@@ -341,7 +341,7 @@ function updateGuidedUnitArmPosition() {
 	guidedUnitArm.rotation.x = guidedUnitArmRotation;
 	guidedUnitHand.rotation.y = direccionGU.angleTo(direccionAstro);
 	controls.rotacionBrazo = rad2deg(guidedUnitArm.rotation.x);
-	controls.rotacionMano = rad2deg(guidedUnitHand.rotation.x);
+	controls.rotacionMano = rad2deg(guidedUnitHand.rotation.y);
 
 	astroLine.children[0].rotation.x = guidedUnitArm.rotation.x;
 	astroLine.children[0].rotation.y = guidedUnitHand.rotation.y;
