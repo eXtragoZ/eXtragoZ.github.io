@@ -114,36 +114,36 @@ function initControls() {
 		width: 200
 	});
 	var menuTierra = gui.addFolder('Posicion en la Tierra');
-	var menuAstro = gui.addFolder('Posicion del Astro (terrestre)');
-	var menuUnidad = gui.addFolder('Rotacion de la Unidad Guiada');
+	var menuAstro = gui.addFolder('Posicion del Astro (respecto tierra)');
+	var menuUnidad = gui.addFolder('Unidad Guiada (Forzado)');
 
-	menuTierra.add(controls, 'latitud', -90, 90, 0.00001).onChange(function () {
+	menuTierra.add(controls, 'latitud', -90, 90, 0.00001).name('Latitud').onChange(function () {
 		updatePositionInEarth();
 	});
-	menuTierra.add(controls, 'longitud', -180, 180, 0.00001).onChange(function () {
+	menuTierra.add(controls, 'longitud', -180, 180, 0.00001).name('Longitud').onChange(function () {
 		updatePositionInEarth();
 	});
-	menuTierra.add(controls, 'rotacionTierra', -180, 180, 0.00001).onChange(function () {
+	menuTierra.add(controls, 'rotacionTierra', -180, 180, 0.00001).name('Rotacion').onChange(function () {
 		earth.rotation.y = deg2rad(controls.rotacionTierra);
 		updateGuidedUnitArmPosition();
 		updateCameraCloseViewPosition();
 		updateVisionLinePosition();
 	});
 
-	menuAstro.add(controls, 'latitudAstro', -90, 90, 0.00001).onChange(function () {
+	menuAstro.add(controls, 'latitudAstro', -90, 90, 0.00001).name('Latitud').onChange(function () {
 		updatePositionAstro();
 	});
-	menuAstro.add(controls, 'longitudAstro', -180, 180, 0.00001).onChange(function () {
+	menuAstro.add(controls, 'longitudAstro', -180, 180, 0.00001).name('Longitud').onChange(function () {
 		updatePositionAstro();
 	});
-	menuAstro.add(controls, 'distanciaAstro').onChange(function () {
+	menuAstro.add(controls, 'distanciaAstro').name('Distancia').onChange(function () {
 		updatePositionAstro();
 	});
-	menuUnidad.add(controls, 'rotacionBrazo', -180, 180).listen().onChange(function () {
+	menuUnidad.add(controls, 'rotacionBrazo', -180, 180).name('Rotacion Brazo').listen().onChange(function () {
 		guidedUnitArm.rotation.x = deg2rad(controls.rotacionBrazo);
 
 	});
-	menuUnidad.add(controls, 'rotacionMano', -180, 180).listen().onChange(function () {
+	menuUnidad.add(controls, 'rotacionMano', -180, 180).name('Rotacion Mano').listen().onChange(function () {
 		guidedUnitHand.rotation.y = deg2rad(controls.rotacionMano);
 	});
 }
@@ -152,7 +152,7 @@ function createLights() {
 	directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
 	directionalLight.position.set(1, 2, 1)
 	scene.add(directionalLight);
-	directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
+	directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
 	directionalLight.position.set(-1, -2, -1)
 	scene.add(directionalLight);
 }
@@ -304,16 +304,17 @@ function updateCameraCloseViewPosition() {
 	var worldPosition = new THREE.Vector3().copy(guidedUnit.position);
 	worldPosition.applyAxisAngle(new THREE.Vector3(0, 1, 0), earth.rotation.y);
 	cameraCloseView.position.set(
-		worldPosition.x * 1.1 + 20 * Math.sin(positionLine.rotation.y + earth.rotation.y),
-		worldPosition.y * 1.1,
-		worldPosition.z * 1.1 + 20 * Math.cos(positionLine.rotation.y + earth.rotation.y)
+		worldPosition.x * 1.2 + 20 * Math.sin(positionLine.rotation.y + earth.rotation.y),
+		worldPosition.y * 1.2,
+		worldPosition.z * 1.2 + 20 * Math.cos(positionLine.rotation.y + earth.rotation.y)
 	);
 
 	//cameraCloseView.rotation.z = deg2rad(-90) + positionLine.rotation.z;
 	cameraControlsCloseView.target.copy(worldPosition);
 }
 function updateGuidedUnitArmPosition() {
-
+	var worldPositionGU = new THREE.Vector3().copy(guidedUnit.position);
+	worldPositionGU.applyAxisAngle(new THREE.Vector3(0, 1, 0), earth.rotation.y);
 	var direccionGU = new THREE.Vector3(0, -1, 0);
 	direccionGU.applyAxisAngle(new THREE.Vector3(0, 0, 1), positionLine.rotation.z);
 	direccionGU.applyAxisAngle(new THREE.Vector3(0, 1, 0), positionLine.rotation.y + earth.rotation.y);
@@ -330,8 +331,8 @@ function updateGuidedUnitArmPosition() {
 		debugIndicator(normal.x, normal.y, normal.z, 0x0000FF);
 	}
 	
-	var guidedUnitArmRotation = guidedUnit.position.angleTo(normal);
-	if (guidedUnit.position.angleTo(direccionAstro) > deg2rad(90)) {
+	var guidedUnitArmRotation = worldPositionGU.angleTo(normal);
+	if (worldPositionGU.angleTo(direccionAstro) > deg2rad(90)) {
 		guidedUnitArmRotation = deg2rad(360) - guidedUnitArmRotation;
 	}
 	
