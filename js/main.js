@@ -23,7 +23,8 @@ let controls = {
 	distanciaAstro: 1000,
 	rotacionBrazo: 0,
 	rotacionMano: 0,
-	rotacionTierra: 0
+	rotacionTierra: 0,
+	autoRotacion: false
 };
 const textureLoader = new THREE.TextureLoader();
 
@@ -123,12 +124,13 @@ function initControls() {
 	menuTierra.add(controls, 'longitud', -180, 180, 0.00001).name('Longitud').onChange(function () {
 		updatePositionInEarth();
 	});
-	menuTierra.add(controls, 'rotacionTierra', -180, 180, 0.00001).name('Rotacion').onChange(function () {
+	menuTierra.add(controls, 'rotacionTierra', -180, 180, 0.00001).name('Rotacion').listen().onChange(function () {
 		earth.rotation.y = deg2rad(controls.rotacionTierra);
 		updateGuidedUnitArmPosition();
 		updateCameraCloseViewPosition();
 		updateVisionLinePosition();
 	});
+	menuTierra.add(controls, 'autoRotacion').name('Rotacion Auto');
 
 	menuAstro.add(controls, 'latitudAstro', -90, 90, 0.00001).name('Latitud').onChange(function () {
 		updatePositionAstro();
@@ -369,6 +371,12 @@ function animate() {
 }
 
 function logic(time) {
+	if (controls.autoRotacion) {
+		earth.rotation.y += deg2rad(1);
+		updateGuidedUnitArmPosition();
+		updateCameraCloseViewPosition();
+		updateVisionLinePosition();
+	}
 	if (timeLogic <= time) {
 		var framesPassed = Math.floor(time - timeLogic);
 
