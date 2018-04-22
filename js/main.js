@@ -37,8 +37,9 @@ var guidedUnitHand = new THREE.Object3D();
 var positionLine;
 var astroLine = new THREE.Object3D();
 
+var debug = false;
+
 function init() {
-	initMenu();
 	container = $('#container');
 	containerCloseView = $('#containerCloseView');
 
@@ -99,10 +100,6 @@ function addCircle() {
 	}
 
 	scene.add(new THREE.Line(geometry, material));
-}
-function initMenu() {
-	$("#debug").hide();
-	$("#animateKPBtn").change(animate);
 }
 function initStats() {
 	stats = new Stats();
@@ -317,25 +314,27 @@ function updateCameraCloseViewPosition() {
 }
 function updateGuidedUnitArmPosition() {
 
-	var direccionGU = new THREE.Vector3(0, -200, 0);
+	var direccionGU = new THREE.Vector3(0, -1, 0);
 	direccionGU.applyAxisAngle(new THREE.Vector3(0, 0, 1), positionLine.rotation.z);
 	direccionGU.applyAxisAngle(new THREE.Vector3(0, 1, 0), positionLine.rotation.y + earth.rotation.y);
-
 	var direccionAstro = new THREE.Vector3().copy(astro.position);
-	direccionAstro.setLength(200);
-
 	var normal = new THREE.Vector3();
 	normal.crossVectors(direccionGU, direccionAstro);
-	normal.setLength(200);
 
-	debugIndicator(direccionGU.x, direccionGU.y, direccionGU.z, 0x00FF00);
-	debugIndicator(direccionAstro.x, direccionAstro.y, direccionAstro.z, 0xFF0000);
-	debugIndicator(normal.x, normal.y, normal.z, 0x0000FF);
+	if (debug) {
+		direccionGU.setLength(200);
+		direccionAstro.setLength(200);
+		normal.setLength(200);
+		debugIndicator(direccionGU.x, direccionGU.y, direccionGU.z, 0x00FF00);
+		debugIndicator(direccionAstro.x, direccionAstro.y, direccionAstro.z, 0xFF0000);
+		debugIndicator(normal.x, normal.y, normal.z, 0x0000FF);
+	}
+	
 	var guidedUnitArmRotation = guidedUnit.position.angleTo(normal);
 	if (guidedUnit.position.angleTo(direccionAstro) > deg2rad(90)) {
 		guidedUnitArmRotation = deg2rad(360) - guidedUnitArmRotation;
 	}
-	//guidedUnitArm.rotation.x = deg2rad(90 + controls.longitud + controls.rotacionTierra - controls.longitudAstro);
+	
 	guidedUnitArm.rotation.x = guidedUnitArmRotation;
 	guidedUnitHand.rotation.y = direccionGU.angleTo(direccionAstro);
 	controls.rotacionBrazo = rad2deg(guidedUnitArm.rotation.x);
