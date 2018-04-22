@@ -3,7 +3,7 @@ var SCENE_WIDTH = window.innerWidth,
 	CAMERA_VIEW_ANGLE = 45,
 	CAMERA_ASPECT = (SCENE_WIDTH / 2) / SCENE_HEIGHT,
 	CAMERA_NEAR = 10,
-	CAMERA_FAR = 7000;
+	CAMERA_FAR = 10000;
 
 
 let container, renderer, camera, scene, cube, stats, cameraControls;
@@ -15,17 +15,6 @@ var clock = new THREE.Clock();
 var timeLogic = 0;
 var frameSpeed = 1 / 60;
 
-let controls = {
-	latitud: 0,
-	longitud: 0,
-	latitudAstro: 0,
-	longitudAstro: 0,
-	distanciaAstro: 1000,
-	rotacionBrazo: 0,
-	rotacionMano: 0,
-	rotacionTierra: 0,
-	autoRotacion: false
-};
 const textureLoader = new THREE.TextureLoader();
 
 var radius = 100, segments = 32; // Earth params
@@ -38,6 +27,17 @@ var guidedUnitHand = new THREE.Object3D();
 var positionLine;
 var astroLine = new THREE.Object3D();
 
+let controls = {
+	latitud: 0,
+	longitud: 0,
+	latitudAstro: 0,
+	longitudAstro: 0,
+	distanciaAstro: 1000,
+	rotacionBrazo: 0,
+	rotacionMano: 0,
+	rotacionTierra: 0,
+	autoRotacion: false
+};
 var debug = false;
 
 function init() {
@@ -54,11 +54,8 @@ function init() {
 
 	camera = new THREE.PerspectiveCamera(CAMERA_VIEW_ANGLE, CAMERA_ASPECT, CAMERA_NEAR, CAMERA_FAR);
 	camera.position.set(1500, 300, 300);
-	camera.lookAt(origin);
 
 	cameraCloseView = new THREE.PerspectiveCamera(CAMERA_VIEW_ANGLE, CAMERA_ASPECT, 1, 300);
-	cameraCloseView.position.set(200, 0, 0);
-	cameraCloseView.lookAt(origin);
 
 	// attach the render-supplied DOM element
 
@@ -70,8 +67,6 @@ function init() {
 
 	// and the camera
 	scene = new THREE.Scene();
-	//const cameraHelper = new THREE.CameraHelper(cameraCloseView);
-	//scene.add(cameraHelper);
 
 	createLights()
 
@@ -79,10 +74,12 @@ function init() {
 	createAstro();
 	createGuidedUnit();
 
-	addCircle()
+	addCircle();
+
+	updatePositionInEarth();
 
 	initStats();
-	initControls()
+	initControls();
 	console.log(scene)
 }
 function addCircle() {
@@ -93,11 +90,7 @@ function addCircle() {
 
 	for (var i = 0; i <= segmentCount; i++) {
 		var theta = (i / segmentCount) * Math.PI * 2;
-		geometry.vertices.push(
-			new THREE.Vector3(
-				Math.cos(theta) * _radius,
-				0,
-				Math.sin(theta) * _radius));
+		geometry.vertices.push(new THREE.Vector3(Math.cos(theta) * _radius, 0, Math.sin(theta) * _radius));
 	}
 
 	scene.add(new THREE.Line(geometry, material));
@@ -110,13 +103,10 @@ function initStats() {
 	containerCloseView.append(stats.domElement);
 }
 function initControls() {
-	const gui = new dat.GUI({
-		closeOnTop: true,
-		width: 200
-	});
-	var menuTierra = gui.addFolder('Posicion en la Tierra');
-	var menuAstro = gui.addFolder('Posicion del Astro (respecto tierra)');
-	var menuUnidad = gui.addFolder('Unidad Guiada (Forzado)');
+	const gui = new dat.GUI({ closeOnTop: true, width: 200 });
+	const menuTierra = gui.addFolder('Posicion en la Tierra');
+	const menuAstro = gui.addFolder('Posicion del Astro (respecto tierra)');
+	const menuUnidad = gui.addFolder('Unidad Guiada (Forzado)');
 
 	menuTierra.add(controls, 'latitud', -90, 90, 0.00001).name('Latitud').onChange(function () {
 		updatePositionInEarth();
@@ -130,7 +120,7 @@ function initControls() {
 		updateCameraCloseViewPosition();
 		updateVisionLinePosition();
 	});
-	menuTierra.add(controls, 'autoRotacion').name('Rotacion Auto');
+	menuTierra.add(controls, 'autoRotacion').name('Auto Rotacion');
 
 	menuAstro.add(controls, 'latitudAstro', -90, 90, 0.00001).name('Latitud').onChange(function () {
 		updatePositionAstro();
@@ -171,7 +161,6 @@ function createEarth() {
 	earth.add(mesh)
 
 	//eje de rotacion
-
 	var material = new THREE.LineDashedMaterial({
 		color: 0x0000FF, linewidth: 1, dashSize: 50, gapSize: 10,
 	});
@@ -210,8 +199,7 @@ function createAstro() {
 	var mesh = new THREE.Mesh(
 		new THREE.SphereGeometry(radius, segments, segments),
 		new THREE.MeshPhongMaterial({
-			map: map, specular: 0x111111, shininess: 1,
-			specularMap: map
+			map: map, specular: 0x111111, shininess: 1, specularMap: map
 		})
 	);
 	astro.add(mesh);
@@ -250,7 +238,10 @@ function createGuidedUnit() {
 	guidedUnitHand.position.set(3.8, 0, 0);
 	guidedUnitHand.add(mesh);
 	guidedUnitArm.add(guidedUnitHand);
-
+	earth.add(guidedUnit);
+	createGuidedUnitVisionLines();
+}
+function createGuidedUnitVisionLines() {
 	var material = new THREE.LineDashedMaterial({
 		color: 0xff0000, linewidth: 1, dashSize: 50, gapSize: 10,
 	});
@@ -262,8 +253,6 @@ function createGuidedUnit() {
 	var visionLine = new THREE.Line(geometry, material);
 	visionLine.computeLineDistances();
 	guidedUnitHand.add(visionLine);
-
-	earth.add(guidedUnit);
 
 	var material = new THREE.LineDashedMaterial({
 		color: 0xff5500, linewidth: 1, dashSize: 50, gapSize: 10,
@@ -277,9 +266,6 @@ function createGuidedUnit() {
 	visionCenterLine.computeLineDistances();
 	astroLine.add(visionCenterLine)
 	scene.add(astroLine);
-
-	updateGuidedUnitArmPosition();
-	updatePositionInEarth();
 }
 
 function updatePositionAstro() {
