@@ -332,12 +332,12 @@ function updateGuidedUnitArmPosition() {
 		debugIndicator(direccionAstro.x, direccionAstro.y, direccionAstro.z, 0xFF0000);
 		debugIndicator(normal.x, normal.y, normal.z, 0x0000FF);
 	}
-	
+
 	var guidedUnitArmRotation = worldPositionGU.angleTo(normal);
 	if (worldPositionGU.angleTo(direccionAstro) > deg2rad(90)) {
 		guidedUnitArmRotation = deg2rad(360) - guidedUnitArmRotation;
 	}
-	
+
 	guidedUnitArm.rotation.x = guidedUnitArmRotation;
 	guidedUnitHand.rotation.y = direccionGU.angleTo(direccionAstro);
 	controls.rotacionBrazo = rad2deg(guidedUnitArm.rotation.x);
@@ -373,6 +373,8 @@ function animate() {
 function logic(time) {
 	if (controls.autoRotacion) {
 		earth.rotation.y += deg2rad(1);
+		controls.rotacionTierra = rad2deg(earth.rotation.y) % 360;
+		controls.rotacionTierra = controls.rotacionTierra > 180 ? controls.rotacionTierra - 360 : controls.rotacionTierra;
 		updateGuidedUnitArmPosition();
 		updateCameraCloseViewPosition();
 		updateVisionLinePosition();
