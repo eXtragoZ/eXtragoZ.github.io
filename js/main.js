@@ -15,9 +15,7 @@ var clock = new THREE.Clock();
 var timeLogic = 0;
 var frameSpeed = 1 / 60;
 
-const textureLoader = new THREE.TextureLoader();
-
-var radius = 100, segments = 32; // Earth params
+var radius = 100; // Earth params
 var earth = new THREE.Object3D();
 var astro = new THREE.Object3D();
 var guidedUnit = new THREE.Object3D();
@@ -149,122 +147,30 @@ function createLights() {
 	scene.add(directionalLight);
 }
 function createEarth() {
-	var map = textureLoader.load('textures/earth.jpg');
-	map.minFilter = THREE.LinearFilter;
-	var mesh = new THREE.Mesh(
-		new THREE.SphereGeometry(radius, segments, segments),
-		new THREE.MeshPhongMaterial({
-			map: map, specular: 0x111111, shininess: 1,
-			bumpMap: map, bumpScale: 0.02, specularMap: map
-		})
-	);
-	earth.add(mesh)
-
-	//eje de rotacion
-	var material = new THREE.LineDashedMaterial({
-		color: 0x0000FF, linewidth: 1, dashSize: 50, gapSize: 10,
-	});
-
-	var geometry = new THREE.Geometry();
-	geometry.vertices.push(
-		new THREE.Vector3(0, -200, 0),
-		new THREE.Vector3(0, 200, 0)
-	);
-
-	var earthLine = new THREE.Line(geometry, material);
-	earthLine.computeLineDistances();
-	earth.add(earthLine);
-
-	//posicion
-	var material = new THREE.LineDashedMaterial({
-		color: 0x00FFFF, linewidth: 1, dashSize: 50, gapSize: 10,
-	});
-
-	var geometry = new THREE.Geometry();
-	geometry.vertices.push(
-		new THREE.Vector3(0, 0, 0),
-		new THREE.Vector3(200, 0, 0)
-	);
-
-	positionLine = new THREE.Line(geometry, material);
-	positionLine.computeLineDistances();
+	earth.add(meshEarth(radius));
+	earth.add(lineEarthAxis());
+	positionLine = lineEarthToGU();
 	earth.add(positionLine);
-
 	scene.add(earth);
 }
 
 function createAstro() {
-	var map = textureLoader.load('textures/sun.jpg');
-	map.minFilter = THREE.LinearFilter;
-	var mesh = new THREE.Mesh(
-		new THREE.SphereGeometry(radius, segments, segments),
-		new THREE.MeshPhongMaterial({
-			map: map, specular: 0x111111, shininess: 1, specularMap: map
-		})
-	);
-	astro.add(mesh);
+	astro.add(meshAstro(radius));
 	astro.position.set(controls.distanciaAstro, 0, 0)
 	scene.add(astro);
 }
 
 function createGuidedUnit() {
-	var mesh = new THREE.Mesh(
-		new THREE.BoxGeometry(2, 2, 2),
-		new THREE.MeshPhongMaterial({ color: 0xbbbbbb })
-	);
-	mesh.position.set(0, -0.5, 0);
-	guidedUnit.add(mesh);
-
-	var mesh = new THREE.Mesh(
-		new THREE.BoxGeometry(2, 0.5, 0.5),
-		new THREE.MeshPhongMaterial({ color: 0x0088FF })
-	);
-	mesh.rotation.set(0, 0, deg2rad(45));
-	mesh.position.set(1.5, 0.5, 0);
-	guidedUnitArm.add(mesh);
-	var mesh = new THREE.Mesh(
-		new THREE.BoxGeometry(2, 0.5, 0.5),
-		new THREE.MeshPhongMaterial({ color: 0x0088FF })
-	);
-	mesh.position.set(3.03, 1.13, 0);
-	guidedUnitArm.add(mesh);
+	guidedUnit.add(meshGuidedUnitBase());
+	guidedUnitArm.add(meshGuidedUnitArm());
 	guidedUnit.add(guidedUnitArm);
-
-	var mesh = new THREE.Mesh(
-		new THREE.TorusBufferGeometry(0.75, 0.2, 5, 7, Math.PI * 3 / 2), //radius, tube, radialSegments, tubularSegments, arc 
-		new THREE.MeshPhongMaterial({ color: 0xFF2211 })
-	);
-	mesh.rotation.set(deg2rad(90), deg2rad(-90), deg2rad(45));
+	guidedUnitHand.add(meshGuidedUnitHand());
 	guidedUnitHand.position.set(3.8, 0, 0);
-	guidedUnitHand.add(mesh);
 	guidedUnitArm.add(guidedUnitHand);
 	earth.add(guidedUnit);
-	createGuidedUnitVisionLines();
-}
-function createGuidedUnitVisionLines() {
-	var material = new THREE.LineDashedMaterial({
-		color: 0xff0000, linewidth: 1, dashSize: 50, gapSize: 10,
-	});
-	var geometry = new THREE.Geometry();
-	geometry.vertices.push(
-		new THREE.Vector3(-1, 0, 0),
-		new THREE.Vector3(controls.distanciaAstro, 0, 0)
-	);
-	var visionLine = new THREE.Line(geometry, material);
-	visionLine.computeLineDistances();
-	guidedUnitHand.add(visionLine);
-
-	var material = new THREE.LineDashedMaterial({
-		color: 0xff5500, linewidth: 1, dashSize: 50, gapSize: 10,
-	});
-	var geometry = new THREE.Geometry();
-	geometry.vertices.push(
-		new THREE.Vector3(0, 0, 0),
-		new THREE.Vector3(controls.distanciaAstro, 0, 0)
-	);
-	var visionCenterLine = new THREE.Line(geometry, material);
-	visionCenterLine.computeLineDistances();
-	astroLine.add(visionCenterLine)
+	//VisionLines
+	guidedUnitHand.add(lineGuidedUnitVision());
+	astroLine.add(lineGuidedUnitSetVision())
 	scene.add(astroLine);
 }
 
