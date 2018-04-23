@@ -297,10 +297,10 @@ function getRandomFloat(min, max) {
 	return Math.random() * (max - min + 1) + min;
 }
 function deg2rad(degrees) {
-	return degrees * (2 * Math.PI / 360);
+	return degrees * (Math.PI / 180);
 }
 function rad2deg(radians) {
-	return radians / (2 * Math.PI / 360);
+	return radians * (180 / Math.PI);
 }
 function normalizeAngle(degrees) {
 	degrees = degrees % 360;
