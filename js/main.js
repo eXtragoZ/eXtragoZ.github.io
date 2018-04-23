@@ -232,13 +232,15 @@ function updateGuidedUnitArmPosition() {
 
 	guidedUnitArm.rotation.x = guidedUnitArmRotation;
 	guidedUnitHand.rotation.y = direccionGU.angleTo(direccionAstro);
-	controls.rotacionBrazo = rad2deg(guidedUnitArm.rotation.x);
+	controls.rotacionBrazo = normalizeAngle(rad2deg(guidedUnitArm.rotation.x));
 	controls.rotacionMano = rad2deg(guidedUnitHand.rotation.y);
-
-	astroLine.children[0].rotation.x = guidedUnitArm.rotation.x;
-	astroLine.children[0].rotation.y = guidedUnitHand.rotation.y;
-	astroLine.rotation.y = positionLine.rotation.y + earth.rotation.y;
-	astroLine.rotation.z = deg2rad(-90) + positionLine.rotation.z;
+	
+	var rotationFromGU = new THREE.Euler(guidedUnitArm.rotation.x, guidedUnitHand.rotation.y, 0);
+	var rotationFromWorld = new THREE.Euler(0, positionLine.rotation.y + earth.rotation.y, deg2rad(-90) + positionLine.rotation.z);
+	
+	astroLine.quaternion.copy(new THREE.Quaternion().setFromEuler(rotationFromWorld));
+	astroLine.quaternion.multiply(new THREE.Quaternion().setFromEuler(rotationFromGU));
+	
 	updateVisionLinePosition();
 }
 function updateVisionLinePosition() {
@@ -265,8 +267,7 @@ function animate() {
 function logic(time) {
 	if (controls.autoRotacion) {
 		earth.rotation.y += deg2rad(1);
-		controls.rotacionTierra = rad2deg(earth.rotation.y) % 360;
-		controls.rotacionTierra = controls.rotacionTierra > 180 ? controls.rotacionTierra - 360 : controls.rotacionTierra;
+		controls.rotacionTierra = normalizeAngle(rad2deg(earth.rotation.y));
 		updateGuidedUnitArmPosition();
 		updateCameraCloseViewPosition();
 		updateVisionLinePosition();
@@ -300,6 +301,10 @@ function deg2rad(degrees) {
 }
 function rad2deg(radians) {
 	return radians / (2 * Math.PI / 360);
+}
+function normalizeAngle(degrees) {
+	degrees = degrees % 360;
+	return degrees > 180 ? degrees - 360 : degrees;
 }
 
 init();
