@@ -4,7 +4,8 @@ body {
 	height: 100%;
 	overflow: hidden;
 	font-family: Arial, serif;
-	background-color: #eeffee;
+	background: url(../textures/starscape.png) #eeffee;
+	background-size: 100%;
 }
 
 #container {

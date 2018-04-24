@@ -79,6 +79,7 @@ function init() {
 
 	initStats();
 	initControls();
+
 	console.log(scene)
 }
 function addCircle() {
