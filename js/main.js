@@ -34,7 +34,8 @@ let controls = {
 	rotacionBrazo: 0,
 	rotacionMano: 0,
 	rotacionTierra: 0,
-	autoRotacion: false
+	autoRotacion: false,
+	menu: 100
 };
 var debug = false;
 
@@ -135,6 +136,16 @@ function initControls() {
 	});
 	menuUnidad.add(controls, 'rotacionMano', -180, 180).name('Rotacion Mano').listen().onChange(function () {
 		guidedUnitHand.rotation.y = deg2rad(controls.rotacionMano);
+	});
+	gui.add(controls, 'menu', [25, 50, 100, 150, 200, 250, 300]).name('Tamaño Menu').onChange(function () {
+		$('.dg.main.a').css({
+			'transform-origin' : '0 0',
+			'-webkit-transform' : 'scale(' + controls.menu*0.01 + ')',
+			'-moz-transform' : 'scale(' + controls.menu*0.01 + ')',
+			'-ms-transform' : 'scale(' + controls.menu*0.01 + ')',
+			'-o-transform' : 'scale(' + controls.menu*0.01 + ')',
+			'transform' : 'scale(' + controls.menu*0.01 + ')'
+		});
 	});
 }
 function createLights() {
