@@ -23,12 +23,14 @@ var THREEx	= THREEx 		|| {};
  * @param {Object} renderer the renderer to update
  * @param {Object} Camera the camera to update
 */
-THREEx.WindowResize	= function(renderer, camera){
+THREEx.WindowResize	= function(renderer, camera, widthPercent, heightPercent){
+	widthPercent = widthPercent || 1;
+	heightPercent = heightPercent || 1;
 	var callback	= function(){
 		// notify the renderer of the size change
-		renderer.setSize( (window.innerWidth/2), window.innerHeight );
+		renderer.setSize( (window.innerWidth*widthPercent), window.innerHeight*heightPercent );
 		// update the camera
-		camera.aspect	= (window.innerWidth/2) / window.innerHeight;
+		camera.aspect	= (window.innerWidth*widthPercent) / window.innerHeight*heightPercent;
 		camera.updateProjectionMatrix();
 	}
 	// bind the resize event
@@ -40,10 +42,16 @@ THREEx.WindowResize	= function(renderer, camera){
 		*/
 		stop	: function(){
 			window.removeEventListener('resize', callback);
+		},
+		
+		
+		change	: function(_widthPercent, _heightPercent){
+			widthPercent = _widthPercent || widthPercent;
+			heightPercent = _heightPercent || heightPercent;
 		}
 	};
 }
 
-THREEx.WindowResize.bind	= function(renderer, camera){
-	return THREEx.WindowResize(renderer, camera);
+THREEx.WindowResize.bind	= function(renderer, camera, widthPercent, heightPercent){
+	return THREEx.WindowResize(renderer, camera, widthPercent, heightPercent);
 }

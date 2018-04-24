@@ -60,8 +60,8 @@ function init() {
 	cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
 	cameraControlsCloseView = new THREE.OrbitControls(cameraCloseView, rendererCloseView.domElement);
 
-	THREEx.WindowResize(renderer, camera);
-	THREEx.WindowResize(rendererCloseView, cameraCloseView);
+	THREEx.WindowResize(renderer, camera, 0.5, 1);
+	THREEx.WindowResize(rendererCloseView, cameraCloseView, 0.5, 1);
 
 	// and the camera
 	scene = new THREE.Scene();
