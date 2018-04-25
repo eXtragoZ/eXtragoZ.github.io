@@ -18,13 +18,23 @@ body {
 	box-sizing: border-box;
 }
 
-#containerCloseView {
+#containerLensView {
 	position: absolute;
 	top: 0px;
 	right: 0px;
 	padding: 0;
 	width: 50%;
-	height: 100%;
+	height: 50%;
+	box-sizing: border-box;
+}
+
+#containerCloseView {
+	position: absolute;
+	top: 50%;
+	right: 0px;
+	padding: 0;
+	width: 50%;
+	height: 50%;
 	box-sizing: border-box;
 }
 

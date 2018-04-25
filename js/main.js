@@ -8,6 +8,7 @@ var SCENE_WIDTH = window.innerWidth,
 
 let container, renderer, camera, scene, cube, stats, cameraControls;
 let containerCloseView, cameraCloseView, rendererCloseView, cameraControlsCloseView;
+let containerLensView, cameraLensView, rendererLensView;
 
 const origin = new THREE.Vector3(0, 0, 0);
 
@@ -42,29 +43,34 @@ var debug = false;
 function init() {
 	container = $('#container');
 	containerCloseView = $('#containerCloseView');
+	containerLensView = $('#containerLensView');
 
 	renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 	renderer.setSize(SCENE_WIDTH / 2, SCENE_HEIGHT);
 	container.append(renderer.domElement);
 
 	rendererCloseView = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-	rendererCloseView.setSize(SCENE_WIDTH / 2, SCENE_HEIGHT);
+	rendererCloseView.setSize(SCENE_WIDTH / 2, SCENE_HEIGHT / 2);
 	containerCloseView.append(rendererCloseView.domElement);
+	
+	rendererLensView = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+	rendererLensView.setSize(SCENE_WIDTH / 2, SCENE_HEIGHT / 2);
+	containerLensView.append(rendererLensView.domElement);
 
 	camera = new THREE.PerspectiveCamera(CAMERA_VIEW_ANGLE, CAMERA_ASPECT, CAMERA_NEAR, CAMERA_FAR);
 	camera.position.set(1500, 300, 300);
 
-	cameraCloseView = new THREE.PerspectiveCamera(CAMERA_VIEW_ANGLE, CAMERA_ASPECT, 1, 300);
-
-	// attach the render-supplied DOM element
+	cameraCloseView = new THREE.PerspectiveCamera(CAMERA_VIEW_ANGLE, SCENE_WIDTH / SCENE_HEIGHT, 1, 300);
+	
+	cameraLensView = new THREE.PerspectiveCamera(10, SCENE_WIDTH / SCENE_HEIGHT, 1, 50000);
 
 	cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
 	cameraControlsCloseView = new THREE.OrbitControls(cameraCloseView, rendererCloseView.domElement);
 
 	THREEx.WindowResize(renderer, camera, 0.5, 1);
-	THREEx.WindowResize(rendererCloseView, cameraCloseView, 0.5, 1);
+	THREEx.WindowResize(rendererCloseView, cameraCloseView, 0.5, 0.5);
+	THREEx.WindowResize(rendererLensView, cameraLensView, 0.5, 0.5);
 
-	// and the camera
 	scene = new THREE.Scene();
 
 	createLights()
@@ -100,7 +106,7 @@ function initStats() {
 	stats.domElement.style.position = 'absolute';
 	stats.domElement.style.top = '0px';
 	stats.domElement.style.right = '0px';
-	containerCloseView.append(stats.domElement);
+	containerLensView.append(stats.domElement);
 }
 function initControls() {
 	const gui = new dat.GUI({ closeOnTop: true, width: 200 });
@@ -209,14 +215,16 @@ function updatePositionInEarth() {
 function updateCameraCloseViewPosition() {
 	var worldPosition = new THREE.Vector3().copy(guidedUnit.position);
 	worldPosition.applyAxisAngle(new THREE.Vector3(0, 1, 0), earth.rotation.y);
-	cameraCloseView.position.set(
-		worldPosition.x * 1.2 + 20 * Math.sin(positionLine.rotation.y + earth.rotation.y),
-		worldPosition.y * 1.2,
-		worldPosition.z * 1.2 + 20 * Math.cos(positionLine.rotation.y + earth.rotation.y)
-	);
+	cameraCloseView.position.copy(worldPosition).multiplyScalar(1.2);
+	cameraCloseView.position.x += 20 * Math.sin(positionLine.rotation.y + earth.rotation.y);
+	cameraCloseView.position.z += 20 * Math.cos(positionLine.rotation.y + earth.rotation.y);
 
 	//cameraCloseView.rotation.z = deg2rad(-90) + positionLine.rotation.z;
 	cameraControlsCloseView.target.copy(worldPosition);
+	
+	cameraLensView.position.copy(worldPosition);
+	var lookPos = new THREE.Vector3().copy(earth.position).negate().add(astro.position).add(cameraLensView.position);
+	cameraLensView.lookAt(lookPos);
 }
 function updateGuidedUnitArmPosition() {
 	var worldPositionGU = new THREE.Vector3().copy(guidedUnit.position);
@@ -272,7 +280,9 @@ function animate() {
 	cameraCloseView.rotation.z += deg2rad(-90) + positionLine.rotation.z;
 	stats.update();
 	renderer.render(scene, camera);
+	rendererLensView.render(scene, cameraLensView);
 	rendererCloseView.render(scene, cameraCloseView);
+	
 	requestAnimationFrame(animate);
 }
 
