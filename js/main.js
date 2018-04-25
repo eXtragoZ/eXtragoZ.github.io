@@ -123,7 +123,7 @@ function initControls() {
 	menuTierra.add(controls, 'rotacionTierra', -180, 180, 0.00001).name('Rotacion').listen().onChange(function () {
 		earth.rotation.y = deg2rad(controls.rotacionTierra);
 		updateGuidedUnitArmPosition();
-		updateCameraCloseViewPosition();
+		updateCameraViewPosition();
 		updateVisionLinePosition();
 	});
 	menuTierra.add(controls, 'autoRotacion').name('Auto Rotacion');
@@ -198,6 +198,7 @@ function updatePositionAstro() {
 	astro.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), deg2rad(controls.longitudAstro));
 
 	updateGuidedUnitArmPosition();
+	updateCameraViewPosition();
 }
 function updatePositionInEarth() {
 	positionLine.rotation.z = deg2rad(controls.latitud);
@@ -210,9 +211,9 @@ function updatePositionInEarth() {
 	guidedUnit.rotation.y = positionLine.rotation.y;
 
 	updateGuidedUnitArmPosition();
-	updateCameraCloseViewPosition();
+	updateCameraViewPosition();
 }
-function updateCameraCloseViewPosition() {
+function updateCameraViewPosition() {
 	var worldPosition = new THREE.Vector3().copy(guidedUnit.position);
 	worldPosition.applyAxisAngle(new THREE.Vector3(0, 1, 0), earth.rotation.y);
 	cameraCloseView.position.copy(worldPosition).multiplyScalar(1.2);
@@ -291,7 +292,7 @@ function logic(time) {
 		earth.rotation.y += deg2rad(1);
 		controls.rotacionTierra = normalizeAngle(rad2deg(earth.rotation.y));
 		updateGuidedUnitArmPosition();
-		updateCameraCloseViewPosition();
+		updateCameraViewPosition();
 		updateVisionLinePosition();
 	}
 	if (timeLogic <= time) {
