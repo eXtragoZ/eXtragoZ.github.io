@@ -26,6 +26,9 @@ var guidedUnitHand = new THREE.Object3D();
 var positionLine;
 var astroLine = new THREE.Object3D();
 
+const angularVelocityEarth = 7.29211501 * 0.00001; //Mean angular velocity of the Earth
+var angularVelocityEarthSimulation = 0;
+
 let controls = {
 	latitud: -34.5784,
 	longitud: -58.5269,
@@ -36,8 +39,8 @@ let controls = {
 	rotacionBrazo: 0,
 	rotacionMano: 0,
 	rotacionTierra: 0,
-	autoRotacion: false,
-	menu: 100
+	menu: 100,
+	velocidad: 0
 };
 var debug = false;
 
@@ -128,8 +131,10 @@ function initControls() {
 		updateCameraViewPosition();
 		updateVisionLinePosition();
 	});
-	menuTierra.add(controls, 'autoRotacion').name('Auto Rotacion');
-
+	menuTierra.add(controls, 'velocidad', {"Detenido":0, "Dia Estelar":100, "Hora":2400, "Minuto":144000, "10 Segundos":864000}).name('Velocidad').onChange(function () {
+		angularVelocityEarthSimulation = angularVelocityEarth * (controls.velocidad * 0.01) 
+	});
+	
 	menuAstro.add(controls, 'latitudAstro', -90, 90, 0.00001).name('Latitud').onChange(function () {
 		updatePositionAstro();
 	});
@@ -139,11 +144,9 @@ function initControls() {
 	menuAstro.add(controls, 'distanciaAstro').name('Distancia').onChange(function () {
 		updatePositionAstro();
 	});
-	
 	menuUnidad.add(controls, 'fixRotacion').name('Compensar Rotacion por Latitud').onChange(function () {
 		updatePositionInEarth();
 	});
-	
 	menuUnidad.add(controls, 'rotacionBrazo', -180, 180).name('Rotacion Brazo').listen().onChange(function () {
 		guidedUnitArm.rotation.x = deg2rad(controls.rotacionBrazo);
 
@@ -151,7 +154,7 @@ function initControls() {
 	menuUnidad.add(controls, 'rotacionMano', -180, 180).name('Rotacion Mano').listen().onChange(function () {
 		guidedUnitHand.rotation.y = deg2rad(controls.rotacionMano);
 	});
-	gui.add(controls, 'menu', [25, 50, 100, 150, 200, 250, 300]).name('Tamaño Menu').onChange(function () {
+	gui.add(controls, 'menu', [75, 100, 150, 200, 250, 300]).name('Tamaño Menu %').onChange(function () {
 		$('.dg.main.a').css({
 			'transform-origin' : '0 0',
 			'-webkit-transform' : 'scale(' + controls.menu*0.01 + ')',
@@ -227,7 +230,7 @@ function updatePositionInEarth() {
 function updateCameraViewPosition() {
 	var worldPosition = new THREE.Vector3().copy(guidedUnit.position);
 	worldPosition.applyAxisAngle(new THREE.Vector3(0, 1, 0), earth.rotation.y);
-	cameraCloseView.position.copy(worldPosition).multiplyScalar(1.2);
+	cameraCloseView.position.copy(worldPosition).multiplyScalar(1.1);
 	cameraCloseView.position.x += 20 * Math.sin(positionLine.rotation.y + earth.rotation.y);
 	cameraCloseView.position.z += 20 * Math.cos(positionLine.rotation.y + earth.rotation.y);
 
@@ -300,9 +303,6 @@ function updateVisionLinePosition() {
 
 function animate() {
 	var delta = clock.getElapsedTime();
-	if (timeLogic == 0) {
-		timeLogic = delta;
-	}
 	logic(delta);
 
 	cameraControls.update(clock.getDelta());
@@ -322,19 +322,14 @@ function fixRotationCamera() {
 		cameraCloseView.rotation.z += deg2rad(-90) + positionLine.rotation.z;
 	}
 }
+
 function logic(time) {
-	if (controls.autoRotacion) {
-		earth.rotation.y += deg2rad(1);
+	if (controls.velocidad > 0) {
+		earth.rotation.y = angularVelocityEarthSimulation * time;
 		controls.rotacionTierra = normalizeAngle(rad2deg(earth.rotation.y));
 		updateGuidedUnitArmPosition();
 		updateCameraViewPosition();
 		updateVisionLinePosition();
-	}
-	if (timeLogic <= time) {
-		var framesPassed = Math.floor(time - timeLogic);
-
-
-		timeLogic += frameSpeed * framesPassed;
 	}
 }
 
