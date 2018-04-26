@@ -27,9 +27,10 @@ var positionLine;
 var astroLine = new THREE.Object3D();
 
 let controls = {
-	latitud: 0,
-	longitud: 0,
-	latitudAstro: 0,
+	latitud: -34.5784,
+	longitud: -58.5269,
+	fixRotacion: true,
+	latitudAstro: -90,
 	longitudAstro: 0,
 	distanciaAstro: 1000,
 	rotacionBrazo: 0,
@@ -82,6 +83,7 @@ function init() {
 	addCircle();
 
 	updatePositionInEarth();
+	updatePositionAstro();
 
 	initStats();
 	initControls();
@@ -137,6 +139,11 @@ function initControls() {
 	menuAstro.add(controls, 'distanciaAstro').name('Distancia').onChange(function () {
 		updatePositionAstro();
 	});
+	
+	menuUnidad.add(controls, 'fixRotacion').name('Compensar Rotacion por Latitud').onChange(function () {
+		updatePositionInEarth();
+	});
+	
 	menuUnidad.add(controls, 'rotacionBrazo', -180, 180).name('Rotacion Brazo').listen().onChange(function () {
 		guidedUnitArm.rotation.x = deg2rad(controls.rotacionBrazo);
 
@@ -207,7 +214,11 @@ function updatePositionInEarth() {
 	guidedUnit.position.set(radius + 1.5, 0, 0);
 	guidedUnit.position.applyAxisAngle(new THREE.Vector3(0, 0, 1), positionLine.rotation.z);
 	guidedUnit.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), positionLine.rotation.y);
-	guidedUnit.rotation.z = deg2rad(-90) + positionLine.rotation.z;
+	if (controls.fixRotacion) {
+		guidedUnit.rotation.z = deg2rad(-90);
+	} else {
+		guidedUnit.rotation.z = deg2rad(-90) + positionLine.rotation.z;
+	}
 	guidedUnit.rotation.y = positionLine.rotation.y;
 
 	updateGuidedUnitArmPosition();
@@ -228,6 +239,34 @@ function updateCameraViewPosition() {
 	cameraLensView.lookAt(lookPos);
 }
 function updateGuidedUnitArmPosition() {
+	if (controls.fixRotacion) {
+		updateGuidedUnitArmPositionFixRotation();
+	} else {
+		updateGuidedUnitArmPositionLatitudeRotation();
+	}
+	
+	controls.rotacionBrazo = normalizeAngle(rad2deg(guidedUnitArm.rotation.x));
+	controls.rotacionMano = rad2deg(guidedUnitHand.rotation.y);
+	if (controls.fixRotacion) {
+		var rotationFromGU = new THREE.Euler(guidedUnitArm.rotation.x, guidedUnitHand.rotation.y, 0);
+		var rotationFromWorld = new THREE.Euler(0, positionLine.rotation.y + earth.rotation.y, deg2rad(-90));
+		
+		astroLine.quaternion.copy(new THREE.Quaternion().setFromEuler(rotationFromWorld));
+		astroLine.quaternion.multiply(new THREE.Quaternion().setFromEuler(rotationFromGU));
+	} else {
+		var rotationFromGU = new THREE.Euler(guidedUnitArm.rotation.x, guidedUnitHand.rotation.y, 0);
+		var rotationFromWorld = new THREE.Euler(0, positionLine.rotation.y + earth.rotation.y, deg2rad(-90) + positionLine.rotation.z);
+		
+		astroLine.quaternion.copy(new THREE.Quaternion().setFromEuler(rotationFromWorld));
+		astroLine.quaternion.multiply(new THREE.Quaternion().setFromEuler(rotationFromGU));
+	}
+	updateVisionLinePosition();
+}
+function updateGuidedUnitArmPositionFixRotation() {
+	guidedUnitArm.rotation.x = earth.rotation.y + deg2rad(90 + controls.longitud - controls.longitudAstro);
+	guidedUnitHand.rotation.y = deg2rad(90+controls.latitudAstro);
+}
+function updateGuidedUnitArmPositionLatitudeRotation() {
 	var worldPositionGU = new THREE.Vector3().copy(guidedUnit.position);
 	worldPositionGU.applyAxisAngle(new THREE.Vector3(0, 1, 0), earth.rotation.y);
 	var direccionGU = new THREE.Vector3(0, -1, 0);
@@ -253,16 +292,6 @@ function updateGuidedUnitArmPosition() {
 
 	guidedUnitArm.rotation.x = guidedUnitArmRotation;
 	guidedUnitHand.rotation.y = direccionGU.angleTo(direccionAstro);
-	controls.rotacionBrazo = normalizeAngle(rad2deg(guidedUnitArm.rotation.x));
-	controls.rotacionMano = rad2deg(guidedUnitHand.rotation.y);
-	
-	var rotationFromGU = new THREE.Euler(guidedUnitArm.rotation.x, guidedUnitHand.rotation.y, 0);
-	var rotationFromWorld = new THREE.Euler(0, positionLine.rotation.y + earth.rotation.y, deg2rad(-90) + positionLine.rotation.z);
-	
-	astroLine.quaternion.copy(new THREE.Quaternion().setFromEuler(rotationFromWorld));
-	astroLine.quaternion.multiply(new THREE.Quaternion().setFromEuler(rotationFromGU));
-	
-	updateVisionLinePosition();
 }
 function updateVisionLinePosition() {
 	astroLine.position.copy(guidedUnit.position);
