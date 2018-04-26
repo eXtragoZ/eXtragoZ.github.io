@@ -307,7 +307,7 @@ function animate() {
 
 	cameraControls.update(clock.getDelta());
 	cameraControlsCloseView.update(clock.getDelta());
-	cameraCloseView.rotation.z += deg2rad(-90) + positionLine.rotation.z;
+	fixRotationCamera();
 	stats.update();
 	renderer.render(scene, camera);
 	rendererLensView.render(scene, cameraLensView);
@@ -315,7 +315,13 @@ function animate() {
 	
 	requestAnimationFrame(animate);
 }
-
+function fixRotationCamera() {
+	if (controls.fixRotacion) {
+		cameraCloseView.rotation.z += deg2rad(-90);
+	} else {
+		cameraCloseView.rotation.z += deg2rad(-90) + positionLine.rotation.z;
+	}
+}
 function logic(time) {
 	if (controls.autoRotacion) {
 		earth.rotation.y += deg2rad(1);
