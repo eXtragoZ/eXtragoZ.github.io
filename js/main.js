@@ -114,7 +114,7 @@ function initStats() {
 	containerLensView.append(stats.domElement);
 }
 function initControls() {
-	const gui = new dat.GUI({ closeOnTop: true, width: 200 });
+	const gui = new dat.GUI({ closeOnTop: true});
 	const menuTierra = gui.addFolder('Posicion en la Tierra');
 	const menuAstro = gui.addFolder('Posicion del Astro (respecto tierra)');
 	const menuUnidad = gui.addFolder('Unidad Guiada (Forzado)');
@@ -131,8 +131,9 @@ function initControls() {
 		updateCameraViewPosition();
 		updateVisionLinePosition();
 	});
-	menuTierra.add(controls, 'velocidad', {"Detenido":0, "Dia Estelar":100, "Hora":2400, "Minuto":144000, "10 Segundos":864000}).name('Velocidad').onChange(function () {
-		angularVelocityEarthSimulation = angularVelocityEarth * (controls.velocidad * 0.01) 
+	menuTierra.add(controls, 'velocidad', {"Detenido":0, "Dia Estelar":1, "Hora":24, "Minuto":1440, "10 Segundos":8640}).name('Velocidad').onChange(function () {
+		// 1 seg = angularVelocityEarth o angularVelocityEarth*24 o angularVelocityEarth*24*60 o angularVelocityEarth*24*60*6
+		angularVelocityEarthSimulation = angularVelocityEarth * controls.velocidad;
 	});
 	
 	menuAstro.add(controls, 'latitudAstro', -90, 90, 0.00001).name('Latitud').onChange(function () {
@@ -234,7 +235,6 @@ function updateCameraViewPosition() {
 	cameraCloseView.position.x += 20 * Math.sin(positionLine.rotation.y + earth.rotation.y);
 	cameraCloseView.position.z += 20 * Math.cos(positionLine.rotation.y + earth.rotation.y);
 
-	//cameraCloseView.rotation.z = deg2rad(-90) + positionLine.rotation.z;
 	cameraControlsCloseView.target.copy(worldPosition);
 	
 	cameraLensView.position.copy(worldPosition);

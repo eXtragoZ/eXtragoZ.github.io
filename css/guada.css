@@ -84,12 +84,31 @@ input[type="number"] {
 	width: 80;
 }
 
-.dg.a
-{    
+.dg.a {    
 	float: left !important;
 	margin-left: 2px !important;
 }
 
 .dg {
     font: 10px 'Lucida Grande', sans-serif !important;
+}
+
+.dg .has-slider input[type="text"] {
+    width: 45% !important;
+}
+
+.dg .slider {
+    width: 56% !important;
+}
+.dg.main{
+	width: 48% !important;
+}
+.dg.main .close-button {
+	background-color: transparent !important;
+}
+.dg li {
+	background-color: transparent !important;
+}
+.dg.main.taller-than-window {
+	 width: 48% !important;
 }
