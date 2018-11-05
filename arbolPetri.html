@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Árbol de alcanzabilidad (coverage tree) para redes de Petri</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="arbolPetri.js"></script>
+	<style>
+		body {
+			white-space: nowrap;
+		}
+		.rama {
+			display: inline-block;
+			border-style: solid;
+			border-width: 0.1px;
+			vertical-align:top;
+		}
+		.arbol, .hijos {list-style: none;
+			width: 100%;
+			margin: 0;
+			padding: 0;
+			white-space: nowrap;
+	
+			
+		}
+		.valor, .old, .deadEnd {
+			text-align: center;
+			padding: 0.3em;
+		}
+	</style>
+  </head>
+  <body>
+	{"lugares":["P1","P2","P3"],"transiciones":[{"nombre":"T1","toma":[{"index":0,"cantidad":1},{"index":2,"cantidad":1}],"da":[]},{"nombre":"T2","toma":[{"index":0,"cantidad":1}],"da":[{"index":2,"cantidad":1}]},{"nombre":"T3","toma":[{"index":1,"cantidad":1},{"index":2,"cantidad":1}],"da":[{"index":2,"cantidad":1}]},{"nombre":"T4","toma":[{"index":0,"cantidad":1}],"da":[{"index":0,"cantidad":1},{"index":1,"cantidad":1}]}],"marcaInicial":[1,0,0]}
+	<br/>
+	Json: <input type="text" id="arbolJson">
+	<button onclick="cargarArbolJson()">Ver arbol</button>
+	<br/><br/>
+    <div id="arbol" class="arbol">
+		
+	</div>
+	<div id="pasos"></div>
+  </body>
+</html>
