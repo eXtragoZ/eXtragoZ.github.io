@@ -22,7 +22,7 @@
 	
 			
 		}
-		.valor, .old, .deadEnd, #cota {
+		.valor, .old, .deadEnd, #cota, #pasos {
 			text-align: center;
 			padding: 0.3em;
 		}
@@ -30,13 +30,33 @@
 			width: 100%;
 			display: block;
 		}
+		.repetido > .valor {
+			border-style: solid;
+			border-width: 3px;
+			border-color: #92a8d1;
+		}
+		
+		.ultimo {
+			border-style: solid;
+			border-width: 3px;
+			border-color: #a892d1;
+		}
+		
+		.actual {
+			border-style: solid;
+			border-width: 3px;
+			border-color: #92d1a8;
+		}
+		
 	</style>
   </head>
   <body>
-	{"lugares":["P1","P2","P3"],"marcaInicial":[1,0,0],"transiciones":[{"nombre":"T0","toma":[1,0,1],"da":[0,0,0]},{"nombre":"T1","toma":[1,0,0],"da":[0,0,1]},{"nombre":"T2","toma":[0,1,1],"da":[0,0,1]},{"nombre":"T3","toma":[1,0,0],"da":[1,1,0]}]}
+	{"marcaInicial":[1,0,0],"transiciones":[{"nombre":"T0","toma":[1,0,1],"da":[0,0,0]},{"nombre":"T1","toma":[1,0,0],"da":[0,0,1]},{"nombre":"T2","toma":[0,1,1],"da":[0,0,1]},{"nombre":"T3","toma":[1,0,0],"da":[1,1,0]}]}
+	<br/>{"marcaInicial":[1,0],"transiciones":[{"nombre":"T1","toma":[1,0],"da":[1,1]}]}
+	<br/>{"marcaInicial":[0,0,0,0,1,0],"transiciones":[{"nombre":"T1","toma":[0,0,0,0,1,0],"da":[1,1,0,0,0,0]}, {"nombre":"T2","toma":[1,0,0,0,0,0],"da":[0,0,1,0,0,0]}, {"nombre":"T3","toma":[0,1,0,0,0,0],"da":[0,0,0,1,0,0]}, {"nombre":"T4","toma":[0,0,1,1,0,0],"da":[0,0,0,0,1,0]}, {"nombre":"T5","toma":[0,0,0,0,1,0],"da":[0,0,0,0,0,1]}]}
 	<br/>
 	Json: <textarea rows="6" id="arbolJson"></textarea>
-	<button onclick="cargarArbolJson()">Ver arbol</button>
+	<button onclick="cargarArbolJson()">Ver arbol</button><button onclick="arbolPorPasos()">Siguiente paso</button> Automatico<input type="checkbox" value="Auto" id="autoArbol">
 	<br/><br/>
     <div id="arbol" class="arbol"></div>
 	<div id="cota"></div>

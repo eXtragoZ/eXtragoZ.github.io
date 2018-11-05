@@ -1,5 +1,4 @@
 let red = {
-    lugares: ["P1","P2","P3"],
     marcaInicial: [1,0,0],
     transiciones: [{
             nombre: "T0",
@@ -18,8 +17,10 @@ let red = {
             toma: [1,0,0],
             da: [1,1,0]
         }
-    ],
+    ]
 }
+
+let estadoActual
 
 function nuevaRama(id, transicion, marca, padre) {
 	const nodo = document.createElement('div')
@@ -30,6 +31,7 @@ function nuevaRama(id, transicion, marca, padre) {
 	const valor = document.createElement('div')
 	$(valor)
 	.addClass('valor')
+	.addClass('ultimo')
     .html(transicion + ": " + marcaAString(marca))
     .appendTo($(nodo))
 	
@@ -62,53 +64,94 @@ function marcaAString(marca) {
 	return resultado.slice(0, resultado.length - 2)
 }
 
-function siguienteEstado(estado, padre) {
-	let esDeadEnd = true
-	while (estado.transicion < red.transiciones.length) {
-		if (transicionHabilitada(estado)) {
-			esDeadEnd = false
-			const nuevaMarca = aplicarTransicion(estado)
-			
-			let nodo = nuevaRama("m-" + estado.nodos.length, red.transiciones[estado.transicion].nombre, nuevaMarca, padre)
-			
-			if (existeEnRed(estado, nuevaMarca)) {
-				old(nodo)
-			} else if(mayorEnRama(estado, nuevaMarca)) {
-				let nodoCubierto = nuevaRama("m-" + estado.nodos.length, "w", nuevaMarca, nodo)
-				if (existeEnRed(estado, nuevaMarca)) {
-					old(nodoCubierto)
-				} else {
-					const nuevoEstado = avanzarEstado(estado, nuevaMarca)	
-					siguienteEstado(nuevoEstado, nodoCubierto)
-				}
-			} else {
-				const nuevoEstado = avanzarEstado(estado, nuevaMarca)
-				siguienteEstado(nuevoEstado, nodo)
-			}
-			
+function siguienteEstado() {
+	$( ".repetido" ).removeClass( "repetido" )
+	$( ".actual" ).removeClass( "actual" )
+	$( ".ultimo" ).removeClass( "ultimo" )
+	
+	estadoActual.nodoJQuery.addClass( "actual" )
+	
+	if (estadoActual.transicion < red.transiciones.length) {
+		if (transicionHabilitada(estadoActual)) {
+			$("#pasos").html(red.transiciones[estadoActual.transicion].nombre + " Habilitada")
+			estadoActual.esDeadEnd = false
+			ejecutarEstado(estadoActual, estadoActual.nodoJQuery)
+		} else {
+			$("#pasos").html(red.transiciones[estadoActual.transicion].nombre + " Deshabilitada")
+			estadoActual.transicion++
 		}
-		estado.transicion++
 	}
-	if (esDeadEnd) {
-		deadEnd(padre)
+	
+	if (estadoActual.transicion >= red.transiciones.length) {
+		if (estadoActual.esDeadEnd) {
+			deadEnd(estadoActual.nodoJQuery)
+		}
+		if (estadoActual.previo != null ) {
+			estadoActual = estadoActual.previo
+		} else {
+			finalizoArbol()
+			return
+		}
+	}
+		
+	if ($("#autoArbol").prop('checked')) {
+		siguienteEstado()
 	}
 }
 
-function avanzarEstado(estadoPrevio, nuevaMarca) {
+function ejecutarEstado(estado, padre) {
+	const nuevaMarca = aplicarTransicion(estado)
+			
+	let nodo = nuevaRama("m-" + estado.nodos.length, red.transiciones[estado.transicion].nombre, nuevaMarca, padre)
+	
+	const yaExiste = existeEnRed(estado, nuevaMarca)
+	
+	estado.nodos.push(nuevaMarca)
+	estado.transicion++
+	
+	const marcaOmega = nuevaMarca.slice()
+	if (yaExiste) {
+		old(nodo)
+	} else if(mayorEnRama(estado, marcaOmega)) {
+		ejecutarEstadoCubierto(estado, nodo, marcaOmega)
+	} else {
+		avanzarEstado(estado, nuevaMarca, nodo)
+	}
+}
+
+function ejecutarEstadoCubierto(estado, nodo, marcaOmega) {
+	let nodoCubierto = nuevaRama("m-" + estado.nodos.length, "w", marcaOmega, nodo)
+	
+	const yaExiste = existeEnRed(estado, marcaOmega)
+	
+	estado.nodos.push(marcaOmega)
+	
+	if (yaExiste) {
+		old(nodoCubierto)
+	} else {
+		avanzarEstado(estado, marcaOmega, nodoCubierto)	
+	}
+}
+
+function avanzarEstado(estadoPrevio, nuevaMarca, nuevoPadre) {
 	const nuevoEstado = {
+		previo: estadoPrevio,
 		nodos: estadoPrevio.nodos,
 		rama: estadoPrevio.rama.slice(),
 		marca: nuevaMarca,
-		transicion: 0
+		transicion: 0,
+		nodoJQuery: nuevoPadre,
+		esDeadEnd: true
 	}
-	nuevoEstado.nodos.push(nuevaMarca)
 	nuevoEstado.rama.push(estadoPrevio.marca)
-	return nuevoEstado;
+	
+	estadoActual = nuevoEstado
 }
 
 function existeEnRed(estado, marca) {
 	for (let nodo of estado.nodos) {
 		if (mismaMarca(marca, nodo)) {
+			marcarNodoRepetido(estado, nodo)
 			return true
 		}
 	}
@@ -184,32 +227,51 @@ function buscarCota(estado) {
 	return cota
 }
 
+function marcarNodoRepetido(estado, nodo) {
+	const i = estado.nodos.indexOf(nodo)
+	$("#m-"+i).addClass('repetido')
+}
+
+function arbolPorPasos() {
+	siguienteEstado()
+}
 
 function cargarArbolJson() {
 	red = JSON.parse($("#arbolJson").val())
 	$("#arbolJson").val(JSON.stringify(red))
 	$("#arbol").html("")
-	let nodo = nuevaRama('m0', "M0",red.marcaInicial, $("#arbol"))
+	$("#pasos").html("")
+	$("#cota").html("")
+	let nodo = nuevaRama('m-0', "M0",red.marcaInicial, $("#arbol"))
 	let estado = {
-	   nodos: [red.marcaInicial],
-	   rama: [red.marcaInicial],
-	   marca: red.marcaInicial,
-	   transicion: 0
+		nodos: [red.marcaInicial],
+		rama: [red.marcaInicial],
+		marca: red.marcaInicial,
+		transicion: 0,
+		nodoJQuery: nodo,
+		esDeadEnd: true
 	}
-	siguienteEstado(estado, nodo)
-	
-	const cota = buscarCota(estado)
+	estadoActual = estado
+	$("#pasos").html("M0")
+	if ($("#autoArbol").prop('checked')) {
+		siguienteEstado()
+	}
+}
+
+function finalizoArbol() {
+	$( ".actual" ).removeClass( "actual" )
+	$( ".ultimo" ).removeClass( "ultimo" )
+	$("#pasos").html("")
+	const cota = buscarCota(estadoActual)
 	if (cota == Infinity) {
 		$("#cota").html("No es acotado")
 	} else {
 		$("#cota").html("Es " + cota + " acotado")
 	}
-	
-	
 }
 
-
 $(document).ready(function(){
+	$("#autoArbol").prop('checked', true);
 	$("#arbolJson").val(JSON.stringify(red))
 	cargarArbolJson()
 })
