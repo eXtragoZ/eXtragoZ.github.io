@@ -1,62 +1,24 @@
 let red = {
     lugares: ["P1","P2","P3"],
+    marcaInicial: [1,0,0],
     transiciones: [{
             nombre: "T0",
-            toma: [{
-                    index: 0,
-                    cantidad: 1
-                }, {
-                    index: 2,
-                    cantidad: 1
-                }
-            ],
-            da: [
-            ]
+            toma: [1,0,1],
+            da: [0,0,0]
         }, {
             nombre: "T1",
-            toma: [{
-                    index: 0,
-                    cantidad: 1
-                }
-            ],
-            da: [{
-                    index: 2,
-                    cantidad: 1
-                }
-            ]
+            toma: [1,0,0],
+            da: [0,0,1]
         }, {
             nombre: "T2",
-            toma: [{
-                    index: 1,
-                    cantidad: 1
-                }, {
-                    index: 2,
-                    cantidad: 1
-                }
-            ],
-            da: [{
-                    index: 2,
-                    cantidad: 1
-                }
-            ]
+            toma: [0,1,1],
+            da: [0,0,1]
         }, {
             nombre: "T3",
-            toma: [{
-                    index: 0,
-                    cantidad: 1
-                }
-            ],
-            da: [{
-                    index: 0,
-                    cantidad: 1
-                }, {
-                    index: 1,
-                    cantidad: 1
-                }
-            ]
+            toma: [1,0,0],
+            da: [1,1,0]
         }
     ],
-    marcaInicial: [1,0,0],
 }
 
 function nuevaRama(id, transicion, marca, padre) {
@@ -195,8 +157,8 @@ function ponerOmegas(marca1, marca2) {
 }
 
 function transicionHabilitada(estado) {
-	for (let lugar of red.transiciones[estado.transicion].toma) {
-		if (estado.marca[lugar.index] < lugar.cantidad) {
+	for (i = 0; i < red.transiciones[estado.transicion].toma.length; i++) {
+		if (estado.marca[i] < red.transiciones[estado.transicion].toma[i]) {
 			return false
 		}
 	}
@@ -205,11 +167,11 @@ function transicionHabilitada(estado) {
 
 function aplicarTransicion(estado) {
 	const nuevaMarca = estado.marca.slice()
-	for (let lugar of red.transiciones[estado.transicion].toma) {
-		nuevaMarca[lugar.index] -= lugar.cantidad
+	for (i = 0; i < red.transiciones[estado.transicion].toma.length; i++) {
+		nuevaMarca[i] -= red.transiciones[estado.transicion].toma[i]
 	}
-	for (let lugar of red.transiciones[estado.transicion].da) {
-		nuevaMarca[lugar.index] += lugar.cantidad
+	for (i = 0; i < red.transiciones[estado.transicion].da.length; i++) {
+		nuevaMarca[i] += red.transiciones[estado.transicion].da[i]
 	}
 	return nuevaMarca
 }

@@ -33,7 +33,7 @@
 	</style>
   </head>
   <body>
-	{"lugares":["P1","P2","P3"],"transiciones":[{"nombre":"T0","toma":[{"index":0,"cantidad":1},{"index":2,"cantidad":1}],"da":[]},{"nombre":"T1","toma":[{"index":0,"cantidad":1}],"da":[{"index":2,"cantidad":1}]},{"nombre":"T2","toma":[{"index":1,"cantidad":1},{"index":2,"cantidad":1}],"da":[{"index":2,"cantidad":1}]},{"nombre":"T3","toma":[{"index":0,"cantidad":1}],"da":[{"index":0,"cantidad":1},{"index":1,"cantidad":1}]}],"marcaInicial":[1,0,0]}
+	{"lugares":["P1","P2","P3"],"marcaInicial":[1,0,0],"transiciones":[{"nombre":"T0","toma":[1,0,1],"da":[0,0,0]},{"nombre":"T1","toma":[1,0,0],"da":[0,0,1]},{"nombre":"T2","toma":[0,1,1],"da":[0,0,1]},{"nombre":"T3","toma":[1,0,0],"da":[1,1,0]}]}
 	<br/>
 	Json: <textarea rows="6" id="arbolJson"></textarea>
 	<button onclick="cargarArbolJson()">Ver arbol</button>
