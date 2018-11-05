@@ -78,27 +78,11 @@ function siguienteEstado(estado, padre) {
 				if (existeEnRed(estado, nuevaMarca)) {
 					old(nodoCubierto)
 				} else {
-					const nuevoEstado = {
-						nodos: estado.nodos,
-						rama: estado.rama.slice(),
-						marca: nuevaMarca,
-						transicion: 0
-					}
-					nuevoEstado.nodos.push(nuevaMarca)
-					nuevoEstado.rama.push(estado.marca)
-					
+					const nuevoEstado = avanzarEstado(estado, nuevaMarca)	
 					siguienteEstado(nuevoEstado, nodoCubierto)
 				}
 			} else {
-				const nuevoEstado = {
-					nodos: estado.nodos,
-					rama: estado.rama.slice(),
-					marca: nuevaMarca,
-					transicion: 0
-				}
-				nuevoEstado.nodos.push(nuevaMarca)
-				nuevoEstado.rama.push(estado.marca)
-				
+				const nuevoEstado = avanzarEstado(estado, nuevaMarca)
 				siguienteEstado(nuevoEstado, nodo)
 			}
 			
@@ -108,6 +92,18 @@ function siguienteEstado(estado, padre) {
 	if (esDeadEnd) {
 		deadEnd(padre)
 	}
+}
+
+function avanzarEstado(estadoPrevio, nuevaMarca) {
+	const nuevoEstado = {
+		nodos: estadoPrevio.nodos,
+		rama: estadoPrevio.rama.slice(),
+		marca: nuevaMarca,
+		transicion: 0
+	}
+	nuevoEstado.nodos.push(nuevaMarca)
+	nuevoEstado.rama.push(estadoPrevio.marca)
+	return nuevoEstado;
 }
 
 function existeEnRed(estado, marca) {
@@ -140,7 +136,7 @@ function mismaMarca(marca1, marca2) {
 }
 
 function marcaMayorIgual(marca1, marca2) {
-	for (i = 0; i < marca1.length; i++) { 
+	for (i = 0; i < marca1.length; i++) {
 		if (marca1[i] < marca2[i]) {
 			return false
 		}	
@@ -176,6 +172,19 @@ function aplicarTransicion(estado) {
 	return nuevaMarca
 }
 
+function buscarCota(estado) {
+	let cota = 0
+	for (let nodo of estado.nodos) {
+		for (let valor of nodo) {
+			if (valor > cota) {
+				cota = valor
+			}	
+		}
+	}
+	return cota
+}
+
+
 function cargarArbolJson() {
 	red = JSON.parse($("#arbolJson").val())
 	$("#arbolJson").val(JSON.stringify(red))
@@ -188,6 +197,15 @@ function cargarArbolJson() {
 	   transicion: 0
 	}
 	siguienteEstado(estado, nodo)
+	
+	const cota = buscarCota(estado)
+	if (cota == Infinity) {
+		$("#cota").html("No es acotado")
+	} else {
+		$("#cota").html("Es " + cota + " acotado")
+	}
+	
+	
 }
 
 
