@@ -26,10 +26,14 @@
 			text-align: center;
 			padding: 0.3em;
 		}
+		input {
+			width: 100%;
+			display: block;
+		}
 	</style>
   </head>
   <body>
-	{"lugares":["P1","P2","P3"],"transiciones":[{"nombre":"T1","toma":[{"index":0,"cantidad":1},{"index":2,"cantidad":1}],"da":[]},{"nombre":"T2","toma":[{"index":0,"cantidad":1}],"da":[{"index":2,"cantidad":1}]},{"nombre":"T3","toma":[{"index":1,"cantidad":1},{"index":2,"cantidad":1}],"da":[{"index":2,"cantidad":1}]},{"nombre":"T4","toma":[{"index":0,"cantidad":1}],"da":[{"index":0,"cantidad":1},{"index":1,"cantidad":1}]}],"marcaInicial":[1,0,0]}
+	{"lugares":["P1","P2","P3"],"transiciones":[{"nombre":"T0","toma":[{"index":0,"cantidad":1},{"index":2,"cantidad":1}],"da":[]},{"nombre":"T1","toma":[{"index":0,"cantidad":1}],"da":[{"index":2,"cantidad":1}]},{"nombre":"T2","toma":[{"index":1,"cantidad":1},{"index":2,"cantidad":1}],"da":[{"index":2,"cantidad":1}]},{"nombre":"T3","toma":[{"index":0,"cantidad":1}],"da":[{"index":0,"cantidad":1},{"index":1,"cantidad":1}]}],"marcaInicial":[1,0,0]}
 	<br/>
 	Json: <input type="text" id="arbolJson">
 	<button onclick="cargarArbolJson()">Ver arbol</button>
