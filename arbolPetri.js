@@ -216,6 +216,7 @@ function aplicarTransicion(estado) {
 
 function cargarArbolJson() {
 	red = JSON.parse($("#arbolJson").val())
+	$("#arbolJson").val(JSON.stringify(red))
 	$("#arbol").html("")
 	let nodo = nuevaRama('m0', "M0",red.marcaInicial, $("#arbol"))
 	let estado = {
